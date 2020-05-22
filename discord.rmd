@@ -1,0 +1,46 @@
+---
+title: "Discord"
+author: "Garrett Allen"
+date: "5/22/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+discord <- read.csv("data/messages.csv")
+```
+
+```{r packages}
+library(tidyverse)
+library(ggplot2)
+library(broom)
+library(tidytext)
+library(wordcloud)
+library(reshape2)
+library(textdata)
+```
+Exploring Discord Data: 
+
+```{r, exploring messages}
+glimpse(discord)
+dis <-discord %>% 
+  mutate(contents = as.character(Contents))
+words <- dis %>% 
+  unnest_tokens(word, contents)
+
+```
+
+```{r words}
+words %>% 
+  anti_join(stop_words) %>% 
+  inner_join(get_sentiments("bing")) %>% 
+  group_by(sentiment) %>% 
+  count(word) %>% 
+  arrange(desc(n)) %>% 
+  slice(1:20) %>% 
+  ggplot(aes(x = fct_reorder(word,n), y = n)) + 
+  geom_col(aes(fill = sentiment)) + 
+  coord_flip() + 
+  theme_bw()
+  
+```
